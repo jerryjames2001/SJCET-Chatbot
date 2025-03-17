@@ -1,10 +1,13 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useContext } from 'react'
 import { gsap } from "gsap";
+import { AppContext } from '../context/AppContext';
+import Chatbot from '../components/Chatbot';
 import Navbar from '../components/Navbar'
 import pic from '../assets/Sjc113-1.jpg'
 
 
 const Home = () => {
+  const { isLoggedin } = useContext(AppContext);
   const contentRef = useRef(null);
   const headingRef = useRef(null);
   const navbarRef = useRef(null);
@@ -76,6 +79,10 @@ useEffect(() => {
           </ul>
         </div>
       </div>
+      {/* Floating Chatbot */}
+      {isLoggedin && (
+        <Chatbot />
+      )}    
     </div>
   );
 };

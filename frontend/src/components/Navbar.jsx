@@ -16,12 +16,12 @@ export default function Example() {
   const navigation = isLoggedin
     ? [
         { name: 'Home', path: '/' },
-        { name: 'About us', path: '/about' },
-        { name: 'Profile', path: '/profile' }
+        // { name: 'About us', path: '/about' },
+        // { name: 'Profile', path: '/profile' }
       ]
     : [
         { name: 'Home', path: '/' },
-        { name: 'About us', path: '/about' },
+        // { name: 'About us', path: '/about' },
         { name: 'Login', path: '/login' }
       ];
 

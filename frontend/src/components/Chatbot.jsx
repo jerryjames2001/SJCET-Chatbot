@@ -25,6 +25,10 @@ const Chatbot = () => {
     }, []);
 
     useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]); // Scroll when messages update
+
+    useEffect(() => {
         if (isOpen) {
             gsap.to(chatWindowRef.current, {
                 width: window.innerWidth < 768 ? '80%' : '30%', // Responsive width
@@ -51,28 +55,38 @@ const Chatbot = () => {
     }, [isOpen]);
 
     const handleSendMessage = async () => {
-        if (!input.trim() || isLoading) return; // Prevent empty or duplicate requests
-
+        if (!input.trim() || isLoading) return;
+    
         const newMessage = { text: input, sender: 'user' };
-        setMessages((prev) => [...prev, newMessage]); // Add user's message to UI
-        setInput(''); // Clear the input field
-        setIsLoading(true); // Disable the send button
-
-        // Simulate sending message to the backend
+        setMessages((prev) => [...prev, newMessage]);
+        setInput('');
+        setIsLoading(true);
+    
+        // Show "Typing..." indicator
+        setMessages((prev) => [...prev, { text: 'Typing...', sender: 'bot' }]);
+    
         try {
             const response = await fetch('', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: input })
             });
-
+    
             const data = await response.json();
-
-            // Add chatbot's response to UI
-            setMessages((prev) => [...prev, { text: data.reply, sender: 'bot' }]);
+    
+            // Replace "Typing..." with the actual response
+            setMessages((prev) =>
+                prev.map(msg =>
+                    msg.text === 'Typing...' ? { text: data.reply, sender: 'bot' } : msg
+                )
+            );
         } catch (error) {
             console.error('Error sending message:', error);
-            setMessages((prev) => [...prev, { text: "I'm having trouble responding right now.", sender: 'bot' }]);
+            setMessages((prev) =>
+                prev.map(msg =>
+                    msg.text === 'Typing...' ? { text: "I'm having trouble responding right now.", sender: 'bot' } : msg
+                )
+            );
         } finally {
             // Automatically enable send button after 10 seconds
             setTimeout(() => setIsLoading(false), 10000);
@@ -90,7 +104,7 @@ const Chatbot = () => {
                 <div className="p-4 w-full h-full flex flex-col relative">
                     <h2 className="text-xl font-bold mb-4">AI Chatbot</h2>
 
-                    <div className="flex-1 bg-white text-black p-3 rounded-md overflow-y-auto space-y-2">
+                    <div className="flex-1 bg-white text-black p-3 rounded-md overflow-y-auto space-y-2" >
                         {messages.map((msg, index) => (
                             <div
                                 key={index}
@@ -102,6 +116,7 @@ const Chatbot = () => {
                                 {msg.text}
                             </div>
                         ))}
+                        <div ref={messagesEndRef} />
                     </div>
 
 

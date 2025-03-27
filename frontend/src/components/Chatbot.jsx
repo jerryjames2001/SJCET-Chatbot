@@ -1,16 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { gsap } from 'gsap';
 import { X } from 'lucide-react';
 import { IoMdSend } from 'react-icons/io'; // Send Icon
 import chatbot from '../assets/chatbot.png';
+import { AppContext } from '../context/AppContext';
 
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const { backendurl, userData } = useContext(AppContext);
     const chatWindowRef = useRef(null);
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef(null); // For auto-scrolling
+    const [username, setUsername] = useState('Jerry');
+
 
 
     useEffect(() => {
@@ -30,8 +34,18 @@ const Chatbot = () => {
 
     useEffect(() => {
         if (isOpen) {
+            const username = userData?.fullname || 'there';
+    
+            // Add welcome message only if it's not already present
+            if (!messages.some(msg => msg.text.includes('how can I assist you?'))) {
+                setMessages((prev) => [
+                    ...prev, 
+                    { text: `Hi ${username}, how can I assist you?`, sender: 'bot' }
+                ]);
+            }
+    
             gsap.to(chatWindowRef.current, {
-                width: window.innerWidth < 768 ? '80%' : '30%', // Responsive width
+                width: window.innerWidth < 768 ? '80%' : '30%',
                 height: window.innerWidth < 768 ? '90%' : '70%',
                 bottom: '2rem',
                 right: '2rem',
@@ -52,7 +66,8 @@ const Chatbot = () => {
                 ease: "power2.inOut"
             });
         }
-    }, [isOpen]);
+    }, [isOpen, userData]); // Ensure username updates dynamically
+    
 
     const handleSendMessage = async () => {
         if (!input.trim() || isLoading) return;
@@ -66,13 +81,14 @@ const Chatbot = () => {
         setMessages((prev) => [...prev, { text: 'Typing...', sender: 'bot' }]);
     
         try {
-            const response = await fetch('', {
+            const response = await fetch(`${backendurl}/api/chatbot/message`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: input })
             });
     
             const data = await response.json();
+            console.log('Response from server:', data)
     
             // Replace "Typing..." with the actual response
             setMessages((prev) =>
@@ -80,6 +96,7 @@ const Chatbot = () => {
                     msg.text === 'Typing...' ? { text: data.reply, sender: 'bot' } : msg
                 )
             );
+            setIsLoading(false);
         } catch (error) {
             console.error('Error sending message:', error);
             setMessages((prev) =>
@@ -87,10 +104,10 @@ const Chatbot = () => {
                     msg.text === 'Typing...' ? { text: "I'm having trouble responding right now.", sender: 'bot' } : msg
                 )
             );
-        } finally {
+        }
             // Automatically enable send button after 10 seconds
             setTimeout(() => setIsLoading(false), 10000);
-        }
+        
     };
 
 

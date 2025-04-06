@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { IoMdSend } from 'react-icons/io'; // Send Icon
 import chatbot from '../assets/chatbot.png';
 import { AppContext } from '../context/AppContext';
+import ReactMarkdown from 'react-markdown';
 
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -15,6 +16,73 @@ const Chatbot = () => {
     const messagesEndRef = useRef(null); // For auto-scrolling
     const [username, setUsername] = useState('Jerry');
 
+    useEffect(() => {
+        if (isOpen) {
+            const username = userData?.fullname || 'there';
+            const userId = userData?._id || 'guest'; // fallback to guest
+
+            const fetchChatHistory = async () => {
+                try {
+                    const res = await fetch(`${backendurl}/api/chatbot/history/${userId}`);
+                    const data = await res.json();
+                    console.log("Fetched chat data:", data);
+            
+                    let formatted = [];
+            
+                    if (Array.isArray(data)) {
+                        // If data is an array of chat objects
+                        formatted = data.flatMap(chat =>
+                            chat.messages?.map(m => ({
+                                text: m.content,
+                                sender: m.role === 'user' ? 'user' : 'bot'
+                            })) || []
+                        );
+                    } else if (Array.isArray(data.messages)) {
+                        // If it's a single chat object with messages
+                        formatted = data.messages.map(m => ({
+                            text: m.content,
+                            sender: m.role === 'user' ? 'user' : 'bot'
+                        }));
+                    } else {
+                        console.warn("⚠️ Unexpected chat data structure:", data);
+                    }
+            
+                    setMessages([
+                        ...formatted,
+                        { text: `Hi ${username}, how can I assist you?`, sender: 'bot' }
+                    ]);
+                } catch (err) {
+                    console.error("⚠️ Error loading chat history:", err);
+                    setMessages([{ text: `Hi ${username}, how can I assist you?`, sender: 'bot' }]);
+                }
+            };
+            
+
+            fetchChatHistory();
+
+            gsap.to(chatWindowRef.current, {
+                width: window.innerWidth < 768 ? '80%' : '30%',
+                height: window.innerWidth < 768 ? '90%' : '70%',
+                bottom: '2rem',
+                right: '2rem',
+                borderRadius: '1rem',
+                opacity: 1,
+                duration: 0.5,
+                ease: "power3.out"
+            });
+        } else {
+            gsap.to(chatWindowRef.current, {
+                width: '4rem',
+                height: '4rem',
+                bottom: '1rem',
+                right: '1rem',
+                borderRadius: '9999px',
+                opacity: 1,
+                duration: 0.3,
+                ease: "power2.inOut"
+            });
+        }
+    }, [isOpen, userData]);
 
 
     useEffect(() => {
@@ -35,15 +103,15 @@ const Chatbot = () => {
     useEffect(() => {
         if (isOpen) {
             const username = userData?.fullname || 'there';
-    
+
             // Add welcome message only if it's not already present
             if (!messages.some(msg => msg.text.includes('how can I assist you?'))) {
                 setMessages((prev) => [
-                    ...prev, 
+                    ...prev,
                     { text: `Hi ${username}, how can I assist you?`, sender: 'bot' }
                 ]);
             }
-    
+
             gsap.to(chatWindowRef.current, {
                 width: window.innerWidth < 768 ? '80%' : '30%',
                 height: window.innerWidth < 768 ? '90%' : '70%',
@@ -67,29 +135,29 @@ const Chatbot = () => {
             });
         }
     }, [isOpen, userData]); // Ensure username updates dynamically
-    
+
 
     const handleSendMessage = async () => {
         if (!input.trim() || isLoading) return;
-    
+
         const newMessage = { text: input, sender: 'user' };
         setMessages((prev) => [...prev, newMessage]);
         setInput('');
         setIsLoading(true);
-    
+
         // Show "Typing..." indicator
         setMessages((prev) => [...prev, { text: 'Typing...', sender: 'bot' }]);
-    
+
         try {
             const response = await fetch(`${backendurl}/api/chatbot/message`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: input })
+                body: JSON.stringify({ message: input ,userId: userData?._id || 'guest'})
             });
-    
+
             const data = await response.json();
             console.log('Response from server:', data)
-    
+
             // Replace "Typing..." with the actual response
             setMessages((prev) =>
                 prev.map(msg =>
@@ -105,9 +173,9 @@ const Chatbot = () => {
                 )
             );
         }
-            // Automatically enable send button after 10 seconds
-            setTimeout(() => setIsLoading(false), 10000);
-        
+        // Automatically enable send button after 10 seconds
+        setTimeout(() => setIsLoading(false), 10000);
+
     };
 
 
@@ -130,7 +198,7 @@ const Chatbot = () => {
                                         ? 'bg-blue-500 text-white ml-auto'
                                         : 'bg-gray-200 text-black'}`}
                             >
-                                {msg.text}
+                                <ReactMarkdown children={msg.text} />
                             </div>
                         ))}
                         <div ref={messagesEndRef} />

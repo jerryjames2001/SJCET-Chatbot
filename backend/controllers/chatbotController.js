@@ -73,6 +73,7 @@ export const chatbotController = async (req, res) => {
           - Keep responses short, simple, and clear like a casual conversation.
           - Format answers using **Markdown** for emphasis and clarity.
           - If the user asks for teacher details, provide only the name and designation.
+          - When describing about fees, use the format: "The fees for [course] is [amount] per year and smester based fees structure instead of paragraph."
           - If possible make the content like a heading and a short description.
           - Use Markdown formatting: **Bold** the teacher names, keep their designation normal.`
           },

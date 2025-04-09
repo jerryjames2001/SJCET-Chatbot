@@ -6,6 +6,7 @@ import { connectDB } from './config/db.js';
 import authRouter from './routes/authRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import ChatbotRouter from './routes/ChatbotRoutes.js';
+import feedbackRouter from './routes/feedbackRoutes.js';
 
 
 dotenv.config();
@@ -24,6 +25,8 @@ app.use('/api/auth', authRouter);
 app.use('/api/user',userRouter)
 
 app.use('/api/chatbot', ChatbotRouter);
+
+app.use('/api/feedback', feedbackRouter);
 
 app.listen(5000, () => {
     connectDB();

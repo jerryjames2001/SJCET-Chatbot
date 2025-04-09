@@ -16,6 +16,7 @@ export default function Example() {
   const navigation = isLoggedin
     ? [
         { name: 'Home', path: '/' },
+        { name: 'Feedback', path: '/feedback' },
         // { name: 'About us', path: '/about' },
         // { name: 'Profile', path: '/profile' }
       ]

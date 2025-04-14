@@ -60,8 +60,10 @@ export const chatbotController = async (req, res) => {
       },
       body: JSON.stringify({
         // model: "deepseek/deepseek-r1-zero:free",
-        model: "openrouter/quasar-alpha",
+        // model: "openrouter/quasar-alpha",   //limitation overed
         // model: "deepseek/deepseek-chat-v3-0324:free",
+        model: "nvidia/llama-3.1-nemotron-ultra-253b-v1:free",  //good but not faster
+        
         messages: [
           {
             role: "system",

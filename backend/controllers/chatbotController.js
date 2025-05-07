@@ -61,8 +61,8 @@ export const chatbotController = async (req, res) => {
       body: JSON.stringify({
         // model: "deepseek/deepseek-r1-zero:free",
         // model: "openrouter/quasar-alpha",   //limitation overed
-        // model: "deepseek/deepseek-chat-v3-0324:free",
-        model: "nvidia/llama-3.1-nemotron-ultra-253b-v1:free",  //good but not faster
+        model: "deepseek/deepseek-chat-v3-0324:free",
+        // model: "nvidia/llama-3.1-nemotron-ultra-253b-v1:free",  //good but not faster
         
         messages: [
           {
@@ -77,7 +77,8 @@ export const chatbotController = async (req, res) => {
           - If the user asks for teacher details, provide only the name and designation.
           - When describing about fees, use the format: "The fees for [course] is [amount] per year and smester based fees structure instead of paragraph."
           - If possible make the content like a heading and a short description.
-          - Use Markdown formatting: **Bold** the teacher names, keep their designation normal.`
+          - Use Markdown formatting: **Bold** the teacher names, keep their designation normal.
+          - If some of the data is not available in the context, say "Sorry, I don't have that information and stop on that specific area."`
           },
           {
             role: "user",
